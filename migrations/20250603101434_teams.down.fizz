@@ -1,0 +1,2 @@
+drop_table("teams")
+drop_index("teams", "teams_team_name_idx")

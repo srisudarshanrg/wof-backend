@@ -1,0 +1,10 @@
+create_table("teams") {
+    t.Column("id", "integer", {primary: true})
+    t.Column("team_name", "string", {"size": 30})
+    t.Column("team_count", "integer")
+    t.Column("member_names", "string")
+    t.Column("school_name", "string")
+    t.Column("password", "string")
+}
+
+add_index("teams", "team_name", {"unique": true})
