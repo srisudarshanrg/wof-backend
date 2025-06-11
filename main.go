@@ -19,13 +19,16 @@ func main() {
 	app.FrontendLink = "http://localhost:4000"
 	app.Port = ":4444"
 
+	log.Println("Connecting to database")
 	db, err := app.ConnectDB()
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
+	log.Println("Connected to database")
 	app.DB = db
 	defer db.Close()
 
+	log.Println("Application running")
 	http.ListenAndServe(app.Port, app.Routes())
 }
