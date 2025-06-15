@@ -8,3 +8,10 @@ type Team struct {
 	SchoolName  string `json:"school_name"`
 	Password    string `json:"password"`
 }
+
+type AdminUser struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}

@@ -69,3 +69,11 @@ func (app *Application) Register(w http.ResponseWriter, r *http.Request) {
 
 	app.writeJSON(w, http.StatusOK, output)
 }
+
+func (app *Application) AdminLogin(w http.ResponseWriter, r *http.Request) {
+	
+}
+
+func (app *Application) Admin(w http.ResponseWriter, r *http.Request) {
+
+}

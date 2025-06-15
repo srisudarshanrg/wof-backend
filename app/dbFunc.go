@@ -1,6 +1,10 @@
 package app
 
-import "log"
+import (
+	"database/sql"
+	"errors"
+	"log"
+)
 
 func (app *Application) AddTeam(team Team) (string, error) {
 	if team.TeamCount > 5 {
@@ -58,4 +62,20 @@ func (app *Application) LoginTeam(team Team) (bool, Team, string, error) {
 	}
 
 	return true, teamRecieved, "Logged in successfully!", nil
+}
+
+func (app *Application) AdminLoginFunc(credential, password string) (AdminUser, error) {
+	query := `select * from admin_credentials where username=$1 or email=$1`
+	row := app.DB.QueryRow(query, credential)
+	var adminUser AdminUser
+	var createdAt, updatedAt interface{}
+	err := row.Scan(&adminUser.ID, &adminUser.Username, &adminUser.Email, &adminUser.Password, &createdAt, &updatedAt)
+	if err != nil && err == sql.ErrNoRows {
+		return AdminUser{}, errors.New("username or password is incorrect")
+	}
+	check := app.ComparePasswordWithHash(password, adminUser.Password)
+	if check != nil {
+		return AdminUser{}, errors.New("username or password is incorrect")
+	}
+	return adminUser, nil
 }

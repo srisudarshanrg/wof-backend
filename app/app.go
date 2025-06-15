@@ -7,4 +7,5 @@ type Application struct {
 	DatabaseDSN  string
 	Port         string
 	DB           *sql.DB
+	Deployed     bool
 }
