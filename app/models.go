@@ -15,3 +15,10 @@ type AdminUser struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
+
+type Project struct {
+	ID          int    `json:"id"`
+	TeamName    string `json:"team_name"`
+	ProjectRepo string `json:"project_repo"`
+	ImageLink   string `json:"image_link"`
+}

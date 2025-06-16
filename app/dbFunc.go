@@ -67,15 +67,98 @@ func (app *Application) LoginTeam(team Team) (bool, Team, string, error) {
 func (app *Application) AdminLoginFunc(credential, password string) (AdminUser, error) {
 	query := `select * from admin_credentials where username=$1 or email=$1`
 	row := app.DB.QueryRow(query, credential)
+
 	var adminUser AdminUser
 	var createdAt, updatedAt interface{}
+
 	err := row.Scan(&adminUser.ID, &adminUser.Username, &adminUser.Email, &adminUser.Password, &createdAt, &updatedAt)
 	if err != nil && err == sql.ErrNoRows {
 		return AdminUser{}, errors.New("username or password is incorrect")
+	} else if err != nil {
+		return AdminUser{}, err
 	}
 	check := app.ComparePasswordWithHash(password, adminUser.Password)
 	if check != nil {
 		return AdminUser{}, errors.New("username or password is incorrect")
 	}
 	return adminUser, nil
+}
+
+func (app *Application) GetDataForAdmin() ([]Team, []Project, error) {
+	queryGetTeams := `select * from teams`
+	rowsTeam, err := app.DB.Query(queryGetTeams)
+	if err != nil {
+		return []Team{}, []Project{}, err
+	}
+	defer rowsTeam.Close()
+
+	var teams []Team
+	for rowsTeam.Next() {
+		var team Team
+		var createdAt, updatedAt interface{}
+
+		err = rowsTeam.Scan(&team.ID, &team.TeamName, &team.TeamCount, &team.MemberNames, &team.SchoolName, &team.Password, &createdAt, &updatedAt)
+		if err != nil {
+			return []Team{}, []Project{}, err
+		}
+
+		teams = append(teams, team)
+	}
+
+	queryGetProjects := `select * from projects`
+	rowsProjects, err := app.DB.Query(queryGetProjects)
+	if err != nil {
+		return []Team{}, []Project{}, err
+	}
+	defer rowsProjects.Close()
+
+	var projects []Project
+	for rowsProjects.Next() {
+		var project Project
+		var createdAt, updatedAt interface{}
+
+		err = rowsProjects.Scan(&project.ID, &project.TeamName, &project.ProjectRepo, &project.ImageLink, &createdAt, &updatedAt)
+		if err != nil {
+			return []Team{}, []Project{}, nil
+		}
+
+		projects = append(projects, project)
+	}
+
+	return teams, projects, nil
+}
+
+func (app *Application) SubmitProject(teamName, projectRepo, imageLink string) (string, error) {
+	queryCheckTeamExists := `select * from teams where team_name=$1`
+	result, err := app.DB.Exec(queryCheckTeamExists, teamName)
+	if err != nil {
+		return "", err
+	}
+	rowsAffected, _ := result.RowsAffected()
+
+	if rowsAffected == 0 {
+		return "", errors.New("the team you are submitting project for does not exist")
+	}
+
+	queryCheckProjectExists := `select id from projects where team_name=$1`
+	row := app.DB.QueryRow(queryCheckProjectExists, teamName)
+	var id int
+	err = row.Scan(&id)
+	if err != nil && err == sql.ErrNoRows {
+		queryAddProject := `insert into projects(team_name, project_repo, image_link) values($1, $2, $3)`
+		_, err = app.DB.Exec(queryAddProject, teamName, projectRepo, imageLink)
+		if err != nil {
+			return "Project added to database", nil
+		}
+	} else if err != nil && err != sql.ErrNoRows {
+		return "", err
+	}
+
+	queryUpdateProject := `update projects set project_repo=$1, image_link=$2 where id=$3`
+	_, err = app.DB.Exec(queryUpdateProject, projectRepo, imageLink, id)
+	if err != nil {
+		return "", err
+	}
+
+	return "Project updated to database", nil
 }

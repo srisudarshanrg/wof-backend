@@ -13,6 +13,7 @@ func (app Application) Home(w http.ResponseWriter, r *http.Request) {
 func (app *Application) Login(w http.ResponseWriter, r *http.Request) {
 	var input Team
 	err := app.readJSON(r, &input)
+	log.Println(input)
 	if err != nil {
 		log.Println(err)
 		app.errorJSON(w, err, http.StatusBadRequest)
@@ -71,9 +72,80 @@ func (app *Application) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) AdminLogin(w http.ResponseWriter, r *http.Request) {
-	
+	type Input struct {
+		Credential string `json:"credential"`
+		Password   string `json:"password"`
+	}
+	var input Input
+	err := app.readJSON(r, &input)
+	if err != nil {
+		log.Println("input error:", err)
+		app.errorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+	log.Println(input)
+
+	admin, err := app.AdminLoginFunc(input.Credential, input.Password)
+	if err != nil {
+		app.errorJSON(w, err, http.StatusBadRequest)
+		log.Println(err)
+		return
+	}
+
+	payload := struct {
+		Admin AdminUser `json:"admin_user"`
+	}{
+		Admin: admin,
+	}
+	app.writeJSON(w, http.StatusOK, payload)
 }
 
 func (app *Application) Admin(w http.ResponseWriter, r *http.Request) {
+	teams, projects, err := app.GetDataForAdmin()
+	if err != nil {
+		app.errorJSON(w, err, http.StatusBadRequest)
+		log.Println(err)
+		return
+	}
 
+	payload := struct {
+		Teams    []Team    `json:"teams"`
+		Projects []Project `json:"projects"`
+	}{
+		Teams:    teams,
+		Projects: projects,
+	}
+
+	app.writeJSON(w, http.StatusOK, payload)
+}
+
+func (app *Application) ProjectSubmit(w http.ResponseWriter, r *http.Request) {
+	type Input struct {
+		TeamName    string `json:"team_name"`
+		ProjectRepo string `json:"project_repo"`
+		ImageLink   string `json:"image_link"`
+	}
+	var input Input
+
+	err := app.readJSON(r, &input)
+	if err != nil {
+		log.Println(err)
+		app.errorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	message, err := app.SubmitProject(input.TeamName, input.ProjectRepo, input.ImageLink)
+	if err != nil {
+		app.errorJSON(w, err, http.StatusBadRequest)
+		log.Println(err)
+		return
+	}
+
+	payload := struct {
+		Message string `json:"message"`
+	}{
+		Message: message,
+	}
+
+	app.writeJSON(w, http.StatusOK, payload)
 }

@@ -1,0 +1,1 @@
+drop_foreign_key("projects", "projects_team_name_fk", {})

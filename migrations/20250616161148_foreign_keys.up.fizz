@@ -1,0 +1,4 @@
+add_foreign_key("projects", "team_name", {"teams": ["team_name"]}, {
+    "on_delete": "cascade",
+    "on_update": "cascade",
+})
