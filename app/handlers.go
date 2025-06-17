@@ -93,14 +93,16 @@ func (app *Application) AdminLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	payload := struct {
-		Admin AdminUser `json:"admin_user"`
+		Admin   AdminUser `json:"admin_user"`
+		Message string    `json:"message"`
 	}{
-		Admin: admin,
+		Admin:   admin,
+		Message: "Login successful",
 	}
 	app.writeJSON(w, http.StatusOK, payload)
 }
 
-func (app *Application) Admin(w http.ResponseWriter, r *http.Request) {
+func (app *Application) 	Admin(w http.ResponseWriter, r *http.Request) {
 	teams, projects, err := app.GetDataForAdmin()
 	if err != nil {
 		app.errorJSON(w, err, http.StatusBadRequest)
@@ -134,7 +136,7 @@ func (app *Application) ProjectSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	message, err := app.SubmitProject(input.TeamName, input.ProjectRepo, input.ImageLink)
+	project, message, err := app.SubmitProject(input.TeamName, input.ProjectRepo, input.ImageLink)
 	if err != nil {
 		app.errorJSON(w, err, http.StatusBadRequest)
 		log.Println(err)
@@ -142,10 +144,40 @@ func (app *Application) ProjectSubmit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	payload := struct {
-		Message string `json:"message"`
+		Message string  `json:"message"`
+		Project Project `json:"project"`
 	}{
 		Message: message,
+		Project: project,
 	}
 
+	app.writeJSON(w, http.StatusOK, payload)
+}
+
+func (app *Application) Project(w http.ResponseWriter, r *http.Request) {
+	type Input struct {
+		TeamName string `json:"team_name"`
+	}
+	var input Input
+
+	err := app.readJSON(r, &input)
+	if err != nil {
+		log.Println(err)
+		app.errorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	project, err := app.GetProjects(input.TeamName)
+	if err != nil {
+		log.Println(err)
+		app.errorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	payload := struct {
+		Project Project `json:"project"`
+	}{
+		Project: project,
+	}
 	app.writeJSON(w, http.StatusOK, payload)
 }
