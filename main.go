@@ -21,7 +21,7 @@ func main() {
 
 	app.Deployed = true
 	app.DatabaseDSN = fmt.Sprintf("host=postgresql-raptor.alwaysdata.net dbname=raptor_wings_of_fire port=5432 user=raptor password=%s", dbPassword)
-	app.DevelopmentFrontendLink = "http://localhost:5173"
+	app.DevelopmentFrontendLink = "http://localhost:4000"
 	app.ProductionFrontendLink = "https://hackspire2025.vercel.app"
 
 	if app.Deployed {

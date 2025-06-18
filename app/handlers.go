@@ -102,7 +102,7 @@ func (app *Application) AdminLogin(w http.ResponseWriter, r *http.Request) {
 	app.writeJSON(w, http.StatusOK, payload)
 }
 
-func (app *Application) 	Admin(w http.ResponseWriter, r *http.Request) {
+func (app *Application) Admin(w http.ResponseWriter, r *http.Request) {
 	teams, projects, err := app.GetDataForAdmin()
 	if err != nil {
 		app.errorJSON(w, err, http.StatusBadRequest)
