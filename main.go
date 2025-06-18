@@ -30,7 +30,7 @@ func main() {
 		app.Port = fmt.Sprintf("localhost:%s", port)
 	}
 
-	log.Println("Connecting to database")
+	log.Println("Connecting to database...")
 	db, err := app.ConnectDB()
 	if err != nil {
 		log.Fatal(err)
