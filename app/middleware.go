@@ -6,7 +6,7 @@ import (
 
 func (app *Application) enableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", app.ProductionFrontendLinkTest)
+		w.Header().Set("Access-Control-Allow-Origin", app.ProductionFrontendLink)
 
 		if r.Method == "OPTIONS" {
 			w.Header().Set("Access-Control-Allow-Credentials", "true")
