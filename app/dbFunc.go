@@ -84,11 +84,11 @@ func (app *Application) AdminLoginFunc(credential, password string) (AdminUser, 
 	return adminUser, nil
 }
 
-func (app *Application) GetDataForAdmin() ([]Team, []Project, error) {
+func (app *Application) GetDataForAdmin() ([]Team, []ProjectTeamJoin, error) {
 	queryGetTeams := `select * from teams`
 	rowsTeam, err := app.DB.Query(queryGetTeams)
 	if err != nil {
-		return []Team{}, []Project{}, err
+		return []Team{}, []ProjectTeamJoin{}, err
 	}
 	defer rowsTeam.Close()
 
@@ -99,7 +99,7 @@ func (app *Application) GetDataForAdmin() ([]Team, []Project, error) {
 
 		err = rowsTeam.Scan(&team.ID, &team.TeamName, &team.TeamCount, &team.MemberNames, &team.SchoolName, &team.Password, &createdAt, &updatedAt)
 		if err != nil {
-			return []Team{}, []Project{}, err
+			return []Team{}, []ProjectTeamJoin{}, err
 		}
 
 		teams = append(teams, team)
@@ -108,18 +108,25 @@ func (app *Application) GetDataForAdmin() ([]Team, []Project, error) {
 	queryGetProjects := `select * from projects`
 	rowsProjects, err := app.DB.Query(queryGetProjects)
 	if err != nil {
-		return []Team{}, []Project{}, err
+		return []Team{}, []ProjectTeamJoin{}, err
 	}
 	defer rowsProjects.Close()
 
-	var projects []Project
+	var projects []ProjectTeamJoin
 	for rowsProjects.Next() {
-		var project Project
+		var project ProjectTeamJoin
 		var createdAt, updatedAt interface{}
 
 		err = rowsProjects.Scan(&project.ID, &project.TeamName, &project.ProjectRepo, &project.ImageLink, &createdAt, &updatedAt)
 		if err != nil {
-			return []Team{}, []Project{}, nil
+			return []Team{}, []ProjectTeamJoin{}, nil
+		}
+
+		getSchoolNameQuery := `select school_name from teams where team_name=$1`
+		row := app.DB.QueryRow(getSchoolNameQuery, &project.TeamName)
+		err = row.Scan(&project.SchoolName)
+		if err != nil {
+			return []Team{}, []ProjectTeamJoin{}, err
 		}
 
 		projects = append(projects, project)

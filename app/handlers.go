@@ -111,8 +111,8 @@ func (app *Application) Admin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	payload := struct {
-		Teams    []Team    `json:"teams"`
-		Projects []Project `json:"projects"`
+		Teams    []Team            `json:"teams"`
+		Projects []ProjectTeamJoin `json:"projects"`
 	}{
 		Teams:    teams,
 		Projects: projects,

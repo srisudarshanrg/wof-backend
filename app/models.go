@@ -22,3 +22,11 @@ type Project struct {
 	ProjectRepo string `json:"project_repo"`
 	ImageLink   string `json:"image_link"`
 }
+
+type ProjectTeamJoin struct {
+	ID          int    `json:"id"`
+	TeamName    string `json:"team_name"`
+	SchoolName  string `json:"school_name"`
+	ProjectRepo string `json:"project_repo"`
+	ImageLink   string `json:"image_link"`
+}
