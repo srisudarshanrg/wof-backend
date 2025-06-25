@@ -135,7 +135,7 @@ func (app *Application) GetDataForAdmin() ([]Team, []ProjectTeamJoin, error) {
 	return teams, projects, nil
 }
 
-func (app *Application) SubmitProject(teamName, projectRepo, imageLink string) (Project, string, error) {
+func (app *Application) SubmitProject(teamName, projectName, projectRepo, imageLink string) (Project, string, error) {
 	queryCheckTeamExists := `select * from teams where team_name=$1`
 	result, err := app.DB.Exec(queryCheckTeamExists, teamName)
 	if err != nil {
@@ -152,8 +152,8 @@ func (app *Application) SubmitProject(teamName, projectRepo, imageLink string) (
 	var id int
 	err = row.Scan(&id)
 	if err != nil && err == sql.ErrNoRows {
-		queryAddProject := `insert into projects(team_name, project_repo, image_link) values($1, $2, $3)`
-		_, err = app.DB.Exec(queryAddProject, teamName, projectRepo, imageLink)
+		queryAddProject := `insert into projects(team_name, project_name, project_repo, image_link) values($1, $2, $3)`
+		_, err = app.DB.Exec(queryAddProject, teamName, projectName, projectRepo, imageLink)
 
 		projectRow := app.DB.QueryRow(`select * from projects where team_name=$1`, teamName)
 		var project Project
@@ -168,8 +168,8 @@ func (app *Application) SubmitProject(teamName, projectRepo, imageLink string) (
 		return Project{}, "", err
 	}
 
-	queryUpdateProject := `update projects set project_repo=$1, image_link=$2 where id=$3`
-	_, err = app.DB.Exec(queryUpdateProject, projectRepo, imageLink, id)
+	queryUpdateProject := `update projects set project_repo=$1, image_link=$2, project_name=$3 where id=$3`
+	_, err = app.DB.Exec(queryUpdateProject, projectRepo, imageLink, projectName, id)
 	if err != nil {
 		return Project{}, "", err
 	}
@@ -177,7 +177,7 @@ func (app *Application) SubmitProject(teamName, projectRepo, imageLink string) (
 	projectRow := app.DB.QueryRow(`select * from projects where team_name=$1`, teamName)
 	var project Project
 	var createdAt, updatedAt interface{}
-	err = projectRow.Scan(&project.ID, &project.TeamName, &project.ProjectRepo, &project.ImageLink, &createdAt, &updatedAt)
+	err = projectRow.Scan(&project.ID, &project.TeamName, &project.ProjectName, &project.ProjectRepo, &project.ImageLink, &createdAt, &updatedAt)
 	if err != nil {
 		return Project{}, "", err
 	}
@@ -191,7 +191,7 @@ func (app *Application) GetProjects(teamName string) (Project, error) {
 
 	var project Project
 	var createdAt, updatedAt interface{}
-	err := row.Scan(&project.ID, &project.TeamName, &project.ProjectRepo, &project.ImageLink, &createdAt, &updatedAt)
+	err := row.Scan(&project.ID, &project.TeamName, &project.ProjectName, &project.ProjectRepo, &project.ImageLink, &createdAt, &updatedAt)
 	if err != nil && err == sql.ErrNoRows {
 		return Project{}, errors.New("no projects yet")
 	}

@@ -19,6 +19,7 @@ type AdminUser struct {
 type Project struct {
 	ID          int    `json:"id"`
 	TeamName    string `json:"team_name"`
+	ProjectName string `json:"project_name"`
 	ProjectRepo string `json:"project_repo"`
 	ImageLink   string `json:"image_link"`
 }
@@ -26,6 +27,7 @@ type Project struct {
 type ProjectTeamJoin struct {
 	ID          int    `json:"id"`
 	TeamName    string `json:"team_name"`
+	ProjectName string `json:"project_name"`
 	SchoolName  string `json:"school_name"`
 	ProjectRepo string `json:"project_repo"`
 	ImageLink   string `json:"image_link"`

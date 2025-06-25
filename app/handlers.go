@@ -124,6 +124,7 @@ func (app *Application) Admin(w http.ResponseWriter, r *http.Request) {
 func (app *Application) ProjectSubmit(w http.ResponseWriter, r *http.Request) {
 	type Input struct {
 		TeamName    string `json:"team_name"`
+		ProjectName string `json:"project_name"`
 		ProjectRepo string `json:"project_repo"`
 		ImageLink   string `json:"image_link"`
 	}
@@ -136,7 +137,7 @@ func (app *Application) ProjectSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	project, message, err := app.SubmitProject(input.TeamName, input.ProjectRepo, input.ImageLink)
+	project, message, err := app.SubmitProject(input.TeamName, input.ProjectName, input.ProjectRepo, input.ImageLink)
 	if err != nil {
 		app.errorJSON(w, err, http.StatusBadRequest)
 		log.Println(err)
