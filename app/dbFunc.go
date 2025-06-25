@@ -117,7 +117,7 @@ func (app *Application) GetDataForAdmin() ([]Team, []ProjectTeamJoin, error) {
 		var project ProjectTeamJoin
 		var createdAt, updatedAt interface{}
 
-		err = rowsProjects.Scan(&project.ID, &project.TeamName, &project.ProjectRepo, &project.ImageLink, &createdAt, &updatedAt)
+		err = rowsProjects.Scan(&project.ID, &project.TeamName, &project.ProjectName, &project.ProjectRepo, &project.ImageLink, &createdAt, &updatedAt)
 		if err != nil {
 			return []Team{}, []ProjectTeamJoin{}, nil
 		}
@@ -139,6 +139,7 @@ func (app *Application) SubmitProject(teamName, projectName, projectRepo, imageL
 	queryCheckTeamExists := `select * from teams where team_name=$1`
 	result, err := app.DB.Exec(queryCheckTeamExists, teamName)
 	if err != nil {
+		log.Println("somethings")
 		return Project{}, "", err
 	}
 	rowsAffected, _ := result.RowsAffected()
@@ -152,13 +153,16 @@ func (app *Application) SubmitProject(teamName, projectName, projectRepo, imageL
 	var id int
 	err = row.Scan(&id)
 	if err != nil && err == sql.ErrNoRows {
-		queryAddProject := `insert into projects(team_name, project_name, project_repo, image_link) values($1, $2, $3)`
+		queryAddProject := `insert into projects(team_name, project_name, project_repo, image_link) values($1, $2, $3, $4)`
 		_, err = app.DB.Exec(queryAddProject, teamName, projectName, projectRepo, imageLink)
+		if err != nil {
+			return Project{}, "", err
+		}
 
 		projectRow := app.DB.QueryRow(`select * from projects where team_name=$1`, teamName)
 		var project Project
 		var createdAt, updatedAt interface{}
-		err = projectRow.Scan(&project.ID, &project.TeamName, &project.ProjectRepo, &project.ImageLink, &createdAt, &updatedAt)
+		err = projectRow.Scan(&project.ID, &project.TeamName, &project.ProjectName, &project.ProjectRepo, &project.ImageLink, &createdAt, &updatedAt)
 		if err != nil {
 			return Project{}, "", err
 		}
@@ -168,7 +172,7 @@ func (app *Application) SubmitProject(teamName, projectName, projectRepo, imageL
 		return Project{}, "", err
 	}
 
-	queryUpdateProject := `update projects set project_repo=$1, image_link=$2, project_name=$3 where id=$3`
+	queryUpdateProject := `update projects set project_repo=$1, image_link=$2, project_name=$3 where id=$4`
 	_, err = app.DB.Exec(queryUpdateProject, projectRepo, imageLink, projectName, id)
 	if err != nil {
 		return Project{}, "", err

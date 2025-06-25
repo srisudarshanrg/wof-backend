@@ -118,6 +118,8 @@ func (app *Application) Admin(w http.ResponseWriter, r *http.Request) {
 		Projects: projects,
 	}
 
+	log.Println(teams, projects)
+
 	app.writeJSON(w, http.StatusOK, payload)
 }
 
